@@ -4,7 +4,7 @@ import torch.nn.functional as f
 from torch.distributions import Normal
 
 from braincog.base.node.node import IFNode, LIFNode
-from braincog.base.strategy.surrogate import QGateGrad
+from braincog.base.strategy.surrogate import AtanGrad
 
 
 thresh = 0.3
@@ -49,13 +49,13 @@ class ActFun(torch.autograd.Function):
         return grad_input * temp.float() / (2 * lens)
 
 
-act_fun = ActFun.apply
-
+#act_fun = ActFun.apply
+act_fun = AtanGrad(alpha=2.,requires_grad=False)
 
 def mem_update(fc, x, mem, spike):
     mem = mem * decay * (1 - spike) + fc(x)
-    spike = act_fun(mem)
-    # spike = QGateGrad.act_fun(x=mem, alpha=2.)
+    #spike = act_fun(mem)
+    spike = act_fun(x=mem-1)
     return mem, spike
 
 
